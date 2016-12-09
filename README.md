@@ -1,3 +1,5 @@
+![alt text](/post/img/bg_odac_600x350_2.jpg "Technology Images")
+
 Docker is an interesting container technology which Microsoft is making available on their Windows Server 2016 platform.
 
 For 4.x dotnet applications which need a connection to an Oracle database the managed Oracle Data Access Client is the easiest route to take these days, 
