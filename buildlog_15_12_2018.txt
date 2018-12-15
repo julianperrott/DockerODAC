@@ -1,0 +1,103 @@
+? docker build -t dockerodac .
+Sending build context to Docker daemon  79.86MB
+Step 1/13 : FROM microsoft/aspnet:4.7.2-windowsservercore-ltsc2016
+ ---> 0430703517dc
+Step 2/13 : RUN Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+ ---> Using cache
+ ---> f17b8a43759f
+Step 3/13 : RUN ["choco", "install", "vcredist2013", "-y", "--allow-empty-checksums"]
+ ---> Running in 5241a2b0fd5f
+Chocolatey v0.10.11
+Installing the following packages:
+vcredist2013
+By installing you accept licenses for the packages.
+Progress: Downloading vcredist2013 12.0.40660.20180427... 100%
+
+vcredist2013 v12.0.40660.20180427 [Approved]
+vcredist2013 package files install completed. Performing other installation steps.
+Downloading vcredist2013 64 bit
+  from 'https://download.microsoft.com/download/0/5/6/056dcda9-d667-4e27-8001-8a0c6971d6b1/vcredist_x64.exe'
+Progress: 100% - Completed download of C:\Users\ContainerAdministrator\AppData\Local\Temp\chocolatey\vcredist2013\12.0.40660.20180427\vcredist_x64.exe (6.87 MB).
+Download of vcredist_x64.exe (6.87 MB) completed.
+Hashes match.
+Installing vcredist2013...
+vcredist2013 has been installed.
+Downloading vcredist2013
+  from 'https://download.microsoft.com/download/0/5/6/056dcda9-d667-4e27-8001-8a0c6971d6b1/vcredist_x86.exe'
+Progress: 100% - Completed download of C:\Users\ContainerAdministrator\AppData\Local\Temp\chocolatey\vcredist2013\12.0.40660.20180427\vcredist_x86.exe (6.21 MB).
+Download of vcredist_x86.exe (6.21 MB) completed.
+Hashes match.
+Installing vcredist2013...
+vcredist2013 has been installed.
+  vcredist2013 may be able to be automatically uninstalled.
+ The install of vcredist2013 was successful.
+  Software installed as 'exe', install location is likely default.
+
+Chocolatey installed 1/1 packages.
+ See the log for details (C:\ProgramData\chocolatey\logs\chocolatey.log).
+
+Enjoy using Chocolatey? Explore more amazing features to take your
+experience to the next level at
+ https://chocolatey.org/compare
+Removing intermediate container 5241a2b0fd5f
+ ---> f50dda7b54c5
+Step 4/13 : COPY . c:/install
+ ---> 32135bfd9bd9
+Step 5/13 : RUN powershell -Command "expand-archive -Path 'c:\install\ODAC122010Xcopy_32bit.zip' -DestinationPath 'c:\install\oracleInstall'"
+ ---> Running in 676f71ac04de
+Removing intermediate container 676f71ac04de
+ ---> 76a47a5a5531
+Step 6/13 : WORKDIR c:/install/oracleInstall
+ ---> Running in 291eca7686fa
+Removing intermediate container 291eca7686fa
+ ---> f2e717830fff
+Step 7/13 : RUN ".\install.bat odp.net4 c:\oracle odac true;"
+ ---> Running in e52c91f67ee8
+Removing intermediate container e52c91f67ee8
+ ---> 0db071e39457
+Step 8/13 : WORKDIR c:/Oracle/ODP.NET/bin/4
+ ---> Running in cda74888f5c6
+Removing intermediate container cda74888f5c6
+ ---> 2bb782148da4
+Step 9/13 : RUN ./oraprovcfg.exe /action:config /product:odp /frameworkversion:v4.0.30319 /providerpath:C:\Oracle\ODP.NET\bin\4\Oracle.DataAccess.dll
+ ---> Running in c6d35d1e613b
+
+INFO: The following section has been added.
+<section name="oracle.dataaccess.client" type="System.Data.Common.DbProviderConfigurationHandler, System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+
+
+INFO: The following section has been added.
+<section name="oracle.unmanageddataaccess.client" type="OracleInternal.Common.CustomSectionHandler, Oracle.DataAccess, Version=4.122.1.0, Culture=neutral, PublicKeyToken=89b483f429c47342" />
+
+
+INFO: The following element added under DbProviderFactories.
+<add name="ODP.NET, Unmanaged Driver" invariant="Oracle.DataAccess.Client" description="Oracle Data Provider for .NET, Unmanaged Driver" type="Oracle.DataAccess.Client.OracleClientFactory, Oracle.DataAccess, Version=4.122.1.0, Culture=neutral, PublicKeyToken=89b483f429c47342" />
+
+Removing intermediate container c6d35d1e613b
+ ---> 66e9ee6c369d
+Step 10/13 : RUN "[Environment]::SetEnvironmentVariable(\"Path\", $env:Path + \";C:\\oracle\\\", [EnvironmentVariableTarget]::Machine)"
+ ---> Running in 250366903f45
+Removing intermediate container 250366903f45
+ ---> e6d4f778e7fd
+Step 11/13 : SHELL ["powershell", "-command"]
+ ---> Running in 35397cfc3b59
+Removing intermediate container 35397cfc3b59
+ ---> 3f7d368ddf28
+Step 12/13 : RUN Import-Module WebAdministration; Set-ItemProperty -Path IIS:\AppPools\'.Net v4.5' -Name enable32BitAppOnWin64 -Value 'True';   Remove-WebSite -Name 'Default Web Site';        New-Website -Name 'my-app' -Port 80 -PhysicalPath 'C:\install' -ApplicationPool '.NET v4.5'
+ ---> Running in 50832db84a89
+
+Name             ID   State      Physical Path                  Bindings
+----             --   -----      -------------                  --------
+my-app           1939 Started    C:\install                     http *:80:
+                 5729
+                 38
+
+
+Removing intermediate container 50832db84a89
+ ---> a51a8f385ae7
+Step 13/13 : ENTRYPOINT powershell
+ ---> Running in 724aa2099fea
+Removing intermediate container 724aa2099fea
+ ---> c8c76db112ee
+Successfully built c8c76db112ee
+Successfully tagged dockerodac:latest
